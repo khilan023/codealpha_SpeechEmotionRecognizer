@@ -187,7 +187,7 @@ Dense(8, softmax) → Predicted Emotion
 
 ## 👨‍💻 Author
 
-**Khilan** — Intern at CodeAlpha  
+**Khilan Kaneriya** — Intern at CodeAlpha  
 GitHub: [@khilan023](https://github.com/khilan023)
 
 ---
