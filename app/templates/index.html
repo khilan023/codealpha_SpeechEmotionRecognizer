@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Speech Emotion Recognition</title>
+
+</head>
+
+<body>
+
+    <h1>Speech Emotion Recognition</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <input type="file" name="audio" required>
+
+        <button type="submit">
+            Predict Emotion
+        </button>
+
+    </form>
+
+    {% if emotion %}
+
+        <h2>
+            Predicted Emotion: {{ emotion }}
+        </h2>
+
+    {% endif %}
+
+</body>
+
+</html>

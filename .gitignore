@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.env
+
+dataset/
+uploads/
+sample_audio/
+
+*.h5
+*.pkl

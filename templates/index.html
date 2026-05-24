@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Emotion in Your Voice</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:    #faf7f2;
+      --warm-white: #fff9f3;
+      --sand:     #e8dfd0;
+      --tan:      #c9b99a;
+      --brown:    #7a5c3f;
+      --dark:     #2d2016;
+      --muted:    #9b8472;
+      --green:    #5a8a6a;
+      --rose:     #c4716a;
+      --amber:    #c08340;
+      --blue:     #5a7fa8;
+      --lavender: #8a7ab5;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--cream);
+      color: var(--dark);
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Paper texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── Decorative background blobs ── */
+    .bg-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob1 { width: 500px; height: 500px; background: #e8d5be; top: -100px; left: -150px; }
+    .blob2 { width: 400px; height: 400px; background: #d4c5b0; bottom: -80px; right: -100px; }
+    .blob3 { width: 300px; height: 300px; background: #c9d5c0; top: 40%; left: 60%; }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 6rem;
+    }
+
+    /* ── Header ── */
+    .header {
+      margin-bottom: 3rem;
+      animation: riseIn 0.8s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 1.2rem;
+    }
+
+    .eyebrow::before, .eyebrow::after {
+      content: '';
+      display: block;
+      width: 28px; height: 1px;
+      background: var(--amber);
+      opacity: 0.6;
+    }
+
+    h1 {
+      font-family: 'Lora', serif;
+      font-size: clamp(2rem, 5.5vw, 3.2rem);
+      font-weight: 600;
+      line-height: 1.18;
+      color: var(--dark);
+      margin-bottom: 1rem;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--brown);
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 460px;
+    }
+
+    /* ── Main card ── */
+    .card {
+      background: var(--warm-white);
+      border: 1.5px solid var(--sand);
+      border-radius: 28px;
+      padding: 2.5rem;
+      box-shadow: 0 4px 32px rgba(122,92,63,0.08), 0 1px 4px rgba(122,92,63,0.05);
+      animation: riseIn 0.8s 0.1s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .card-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tan);
+      margin-bottom: 1.2rem;
+    }
+
+    /* ── Drop zone ── */
+    .drop-zone {
+      border: 2px dashed var(--sand);
+      border-radius: 20px;
+      padding: 2.8rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: var(--cream);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1.4rem;
+    }
+
+    .drop-zone::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 40%, rgba(192,131,64,0.06), transparent 70%);
+      transition: opacity 0.3s;
+      opacity: 0;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--amber);
+      border-style: solid;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(192,131,64,0.12);
+    }
+    .drop-zone:hover::before, .drop-zone.dragover::before { opacity: 1; }
+
+    .mic-art {
+      width: 72px; height: 72px;
+      margin: 0 auto 1.4rem;
+      position: relative;
+    }
+
+    .mic-art svg {
+      width: 100%; height: 100%;
+      color: var(--amber);
+    }
+
+    /* Ripple rings around mic */
+    .mic-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1.5px solid var(--amber);
+      opacity: 0;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      animation: ripple 2.4s ease-out infinite;
+    }
+    .mic-ring:nth-child(2) { width: 90px; height: 90px; animation-delay: 0.6s; }
+    .mic-ring:nth-child(3) { width: 116px; height: 116px; animation-delay: 1.2s; }
+
+    .drop-title {
+      font-family: 'Lora', serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .drop-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.4rem;
+      line-height: 1.6;
+    }
+
+    input[type="file"] { display: none; }
+
+    .browse-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--warm-white);
+      border: 1.5px solid var(--sand);
+      color: var(--brown);
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 9px 22px;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(122,92,63,0.08);
+    }
+
+    .browse-btn:hover {
+      background: var(--sand);
+      border-color: var(--tan);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(122,92,63,0.15);
+    }
+
+    /* ── File preview ── */
+    .file-preview {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      background: var(--cream);
+      border: 1.5px solid var(--sand);
+      border-radius: 16px;
+      padding: 14px 18px;
+      margin-bottom: 1.4rem;
+      animation: riseIn 0.4s ease both;
+    }
+    .file-preview.show { display: flex; }
+
+    .file-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, #f5edd6, #ead4b5);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .file-icon svg { width: 22px; height: 22px; color: var(--amber); }
+
+    .file-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--dark);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .file-size { font-size: 0.76rem; color: var(--muted); margin-top: 2px; }
+
+    /* Mini waveform */
+    .mini-wave {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 32px;
+    }
+    .mini-bar {
+      width: 3px;
+      border-radius: 2px;
+      background: var(--amber);
+      opacity: 0.65;
+      animation: waveBounce 1s ease-in-out infinite;
+    }
+    .mini-bar:nth-child(1) { animation-delay: 0s;    height: 10px; }
+    .mini-bar:nth-child(2) { animation-delay: 0.1s;  height: 18px; }
+    .mini-bar:nth-child(3) { animation-delay: 0.2s;  height: 26px; }
+    .mini-bar:nth-child(4) { animation-delay: 0.3s;  height: 32px; }
+    .mini-bar:nth-child(5) { animation-delay: 0.4s;  height: 26px; }
+    .mini-bar:nth-child(6) { animation-delay: 0.3s;  height: 18px; }
+    .mini-bar:nth-child(7) { animation-delay: 0.1s;  height: 10px; }
+
+    .remove-btn {
+      width: 30px; height: 30px;
+      background: none;
+      border: 1.5px solid var(--sand);
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .remove-btn:hover { background: #fde8e8; border-color: #e5a0a0; color: var(--rose); }
+
+    /* ── Formats ── */
+    .formats {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 1.6rem;
+    }
+    .formats-label { font-size: 0.76rem; color: var(--muted); }
+    .fmt {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--tan);
+      background: var(--cream);
+      border: 1px solid var(--sand);
+      border-radius: 5px;
+      padding: 2px 8px;
+    }
+
+    /* ── Submit button ── */
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--brown);
+      border: none;
+      border-radius: 16px;
+      color: #fdf7ee;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.01em;
+    }
+
+    .submit-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      background: #5d4029;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(122,92,63,0.35);
+    }
+
+    .submit-btn:active:not(:disabled) { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-loading { display: none; align-items: center; justify-content: center; gap: 10px; }
+    .submit-btn.loading .btn-text { display: none; }
+    .submit-btn.loading .btn-loading { display: flex; }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* ── Error ── */
+    .error-msg {
+      display: none;
+      margin-top: 1rem;
+      padding: 12px 16px;
+      background: #fff0ee;
+      border: 1.5px solid #f5c5be;
+      border-radius: 12px;
+      color: var(--rose);
+      font-size: 0.875rem;
+      text-align: center;
+    }
+    .error-msg.show { display: block; }
+
+    /* ── Result card ── */
+    .result-wrap {
+      display: none;
+      margin-top: 2rem;
+      animation: riseIn 0.6s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .result-wrap.show { display: block; }
+
+    .result-card {
+      background: var(--warm-white);
+      border: 1.5px solid var(--sand);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 4px 32px rgba(122,92,63,0.08);
+    }
+
+    /* Emotion hero banner */
+    .result-banner {
+      padding: 2.5rem 2rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .emotion-illustration {
+      width: 96px; height: 96px;
+      margin: 0 auto 1.2rem;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      animation: popIn 0.5s cubic-bezier(0.36,0.07,0.19,0.97) both;
+      position: relative;
+    }
+
+    .emotion-illustration svg { width: 54px; height: 54px; }
+
+    .emotion-name {
+      font-family: 'Lora', serif;
+      font-size: 2.4rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      line-height: 1;
+    }
+
+    .emotion-note {
+      font-size: 0.92rem;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    /* ── Confidence section ── */
+    .conf-section {
+      padding: 1.6rem 2rem 2rem;
+      border-top: 1.5px solid var(--sand);
+    }
+
+    .conf-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1.2rem;
+    }
+
+    .conf-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tan);
+    }
+
+    .conf-number {
+      font-family: 'Lora', serif;
+      font-size: 2.4rem;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    /* Track bar */
+    .track {
+      width: 100%;
+      height: 8px;
+      background: var(--sand);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 0.6rem;
+    }
+
+    .track-fill {
+      height: 100%;
+      border-radius: 99px;
+      width: 0%;
+      transition: width 1.1s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .conf-label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Scale dots */
+    .conf-dots {
+      display: flex;
+      gap: 8px;
+      margin-top: 1.4rem;
+    }
+
+    .conf-dot-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .conf-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      border: 2px solid var(--sand);
+      transition: all 0.3s ease;
+    }
+
+    .conf-dot.lit {
+      border-color: transparent;
+    }
+
+    .conf-dot-text {
+      font-size: 0.62rem;
+      color: var(--muted);
+      text-align: center;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Tag line ── */
+    .result-footer {
+      padding: 1.2rem 2rem;
+      border-top: 1.5px solid var(--sand);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .model-tag {
+      font-size: 0.72rem;
+      color: var(--tan);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .model-tag::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      display: block;
+    }
+
+    .analyze-again {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--brown);
+      background: none;
+      border: 1.5px solid var(--sand);
+      border-radius: 99px;
+      padding: 5px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .analyze-again:hover { background: var(--sand); border-color: var(--tan); }
+
+    /* ── Feature trio ── */
+    .trio {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 2rem;
+      animation: riseIn 0.8s 0.2s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .trio-item {
+      background: var(--warm-white);
+      border: 1.5px solid var(--sand);
+      border-radius: 20px;
+      padding: 1.4rem 1.2rem;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .trio-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 24px rgba(122,92,63,0.1);
+    }
+
+    .trio-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 0.9rem;
+      font-size: 1.3rem;
+    }
+
+    .trio-title {
+      font-family: 'Lora', serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 0.4rem;
+    }
+
+    .trio-desc {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* ── Animations ── */
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes ripple {
+      0%   { opacity: 0.5; transform: translate(-50%,-50%) scale(0.7); }
+      100% { opacity: 0;   transform: translate(-50%,-50%) scale(1.4); }
+    }
+    @keyframes waveBounce {
+      0%, 100% { transform: scaleY(0.6); }
+      50%       { transform: scaleY(1); }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes popIn {
+      0%   { transform: scale(0.4); opacity: 0; }
+      60%  { transform: scale(1.12); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    @media (max-width: 600px) {
+      .trio { grid-template-columns: 1fr; }
+      .card, .result-banner, .conf-section { padding: 1.6rem; }
+      h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-blob blob1"></div>
+  <div class="bg-blob blob2"></div>
+  <div class="bg-blob blob3"></div>
+
+  <div class="page">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="eyebrow">Voice Analysis Tool</div>
+      <h1>What does your<br/>voice <em>feel</em> like?</h1>
+      <p class="subtitle">Upload a short audio clip and our model will listen for the emotion woven into every word — happiness, sadness, calm, and more.</p>
+    </div>
+
+    <!-- Upload card -->
+    <div class="card">
+      <div class="card-label">Upload audio</div>
+
+      <form id="emotionForm" action="/predict" method="POST" enctype="multipart/form-data">
+
+        <!-- Drop zone -->
+        <div class="drop-zone" id="dropZone">
+          <div class="mic-art">
+            <!-- ripple rings -->
+            <div class="mic-ring"></div>
+            <div class="mic-ring"></div>
+            <!-- mic SVG -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="2" width="6" height="11" rx="3"/>
+              <path d="M5 10a7 7 0 0 0 14 0"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+              <line x1="8" y1="22" x2="16" y2="22"/>
+            </svg>
+          </div>
+          <p class="drop-title">Drop your audio here</p>
+          <p class="drop-sub">Or click below to choose a file from your device</p>
+          <button type="button" class="browse-btn" id="browseBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Choose a file
+          </button>
+          <input type="file" name="audio" id="audioInput" accept=".wav,.mp3,.ogg,.flac,.m4a" style="display:none"/>
+        </div>
+
+        <!-- File preview (shown after file selection) -->
+        <div class="file-preview" id="filePreview">
+          <div class="file-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div class="file-name" id="fileName">audio.wav</div>
+            <div class="file-size" id="fileSize">0 KB</div>
+          </div>
+          <div class="mini-wave">
+            <div class="mini-bar"></div>
+            <div class="mini-bar"></div>
+            <div class="mini-bar"></div>
+            <div class="mini-bar"></div>
+            <div class="mini-bar"></div>
+            <div class="mini-bar"></div>
+            <div class="mini-bar"></div>
+          </div>
+          <button type="button" class="remove-btn" id="removeBtn" title="Remove">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <!-- Format tags -->
+        <div class="formats">
+          <span class="formats-label">Accepts:</span>
+          <span class="fmt">wav</span>
+          <span class="fmt">mp3</span>
+          <span class="fmt">ogg</span>
+          <span class="fmt">flac</span>
+          <span class="fmt">m4a</span>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="submit-btn" id="submitBtn" disabled>
+          <span class="btn-text">Listen &amp; Analyse →</span>
+          <span class="btn-loading">
+            <div class="spinner"></div>
+            Listening carefully…
+          </span>
+        </button>
+      </form>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <!-- Result -->
+      <div class="result-wrap" id="resultWrap">
+        <div class="result-card">
+
+          <div class="result-banner" id="resultBanner">
+            <div class="emotion-illustration" id="emotionIllustration"></div>
+            <div class="emotion-name" id="emotionName">Happy</div>
+            <div class="emotion-note" id="emotionNote">The speaker sounds joyful and positive.</div>
+          </div>
+
+          <div class="conf-section">
+            <div class="conf-header">
+              <span class="conf-title">Confidence</span>
+              <span class="conf-number" id="confNumber">0%</span>
+            </div>
+            <div class="track">
+              <div class="track-fill" id="trackFill"></div>
+            </div>
+            <div class="conf-label">
+              <span id="confLevelLabel">—</span>
+              <span style="opacity:0.5">out of 100%</span>
+            </div>
+
+            <!-- 5 dots scale -->
+            <div class="conf-dots" id="confDots">
+              <div class="conf-dot-item">
+                <div class="conf-dot" id="dot1"></div>
+                <span class="conf-dot-text">Very Low</span>
+              </div>
+              <div class="conf-dot-item">
+                <div class="conf-dot" id="dot2"></div>
+                <span class="conf-dot-text">Low</span>
+              </div>
+              <div class="conf-dot-item">
+                <div class="conf-dot" id="dot3"></div>
+                <span class="conf-dot-text">Moderate</span>
+              </div>
+              <div class="conf-dot-item">
+                <div class="conf-dot" id="dot4"></div>
+                <span class="conf-dot-text">High</span>
+              </div>
+              <div class="conf-dot-item">
+                <div class="conf-dot" id="dot5"></div>
+                <span class="conf-dot-text">Very High</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="result-footer">
+            <span class="model-tag">RAVDESS · Deep Learning model</span>
+            <button class="analyze-again" id="analyzeAgain">Analyse another →</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /card -->
+
+    <!-- Feature trio -->
+    <div class="trio">
+      <div class="trio-item">
+        <div class="trio-icon" style="background:#f5f0e8;">🧠</div>
+        <div class="trio-title">Trained carefully</div>
+        <div class="trio-desc">MFCC feature extraction on the RAVDESS dataset for solid generalisation.</div>
+      </div>
+      <div class="trio-item">
+        <div class="trio-icon" style="background:#eef3ee;">⚡</div>
+        <div class="trio-title">Fast results</div>
+        <div class="trio-desc">Inference in seconds, with a confidence score across 8 emotion classes.</div>
+      </div>
+      <div class="trio-item">
+        <div class="trio-icon" style="background:#f0eef5;">🎯</div>
+        <div class="trio-title">8 emotions</div>
+        <div class="trio-desc">Happy, sad, angry, neutral, fearful, surprised, calm, and disgust.</div>
+      </div>
+    </div>
+
+  </div><!-- /page -->
+
+  <script>
+    /* ── Emotion config ── */
+    const emotions = {
+      happy:     { label:'Happy',     note:'The speaker sounds joyful and uplifted.',          color:'#e6a817', bg:'#fffae8', svgPath:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>' },
+      sad:       { label:'Sad',       note:'A low-energy, melancholic tone was detected.',     color:'#4a90d9', bg:'#eaf3fb', svgPath:'<circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>' },
+      angry:     { label:'Angry',     note:'A high-intensity, tense emotion was found.',       color:'#e03e3e', bg:'#fdeaea', svgPath:'<circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><path d="M7.5 8.5c.5-.5 1.5-.5 2 0"/><path d="M14.5 8.5c.5-.5 1.5-.5 2 0"/>' },
+      neutral:   { label:'Neutral',   note:'The voice sounds calm with no strong emotion.',   color:'#7c7c99', bg:'#f4f4f8', svgPath:'<circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>' },
+      fearful:   { label:'Fearful',   note:'Signs of anxiety or unease in the voice.',        color:'#d97b20', bg:'#fef3e6', svgPath:'<circle cx="12" cy="12" r="10"/><path d="M8 15s1-1 4-1 4 1 4 1"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/>' },
+      surprised: { label:'Surprised', note:'An unexpected or sudden emotional shift noted.',   color:'#cc44aa', bg:'#fceef8', svgPath:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="15" r="2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>' },
+      calm:      { label:'Calm',      note:'The speaker sounds composed and at ease.',         color:'#3aaa6e', bg:'#e8f7ee', svgPath:'<circle cx="12" cy="12" r="10"/><path d="M8 13.5c1.5 1 5 1 8 0"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>' },
+      disgust:   { label:'Disgust',   note:'A negative reaction was detected in the tone.',   color:'#7a7a2a', bg:'#f5f5e0', svgPath:'<circle cx="12" cy="12" r="10"/><path d="M8 14s2-1 4 0 4 0 4 0"/><path d="M9 9.5c0-.5.5-1 1.5-.5"/><path d="M15 9.5c0-.5-.5-1-1.5-.5"/>' },
+    };
+
+    const confLevels = [
+      { min:80, max:100, pips:5, text:'Very high confidence' },
+      { min:65, max:79,  pips:4, text:'High confidence' },
+      { min:50, max:64,  pips:3, text:'Moderate confidence' },
+      { min:35, max:49,  pips:2, text:'Low confidence' },
+      { min: 0, max:34,  pips:1, text:'Very low confidence' },
+    ];
+
+    function getLevel(pct) {
+      return confLevels.find(l => pct >= l.min && pct <= l.max) || confLevels[confLevels.length-1];
+    }
+
+    /* ── DOM refs ── */
+    const dropZone    = document.getElementById('dropZone');
+    const audioInput  = document.getElementById('audioInput');
+    const filePreview = document.getElementById('filePreview');
+    const fileName    = document.getElementById('fileName');
+    const fileSize    = document.getElementById('fileSize');
+    const removeBtn   = document.getElementById('removeBtn');
+    const submitBtn   = document.getElementById('submitBtn');
+    const emotionForm = document.getElementById('emotionForm');
+    const resultWrap  = document.getElementById('resultWrap');
+    const errorMsg    = document.getElementById('errorMsg');
+    const analyzeAgain = document.getElementById('analyzeAgain');
+
+    /* ── File helpers ── */
+    function showFile(file) {
+      fileName.textContent = file.name;
+      fileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+      filePreview.classList.add('show');
+      dropZone.style.display = 'none';
+      submitBtn.disabled = false;
+      resultWrap.classList.remove('show');
+      errorMsg.classList.remove('show');
+    }
+
+    function resetUpload() {
+      audioInput.value = '';
+      filePreview.classList.remove('show');
+      dropZone.style.display = '';
+      submitBtn.disabled = true;
+      resultWrap.classList.remove('show');
+      errorMsg.classList.remove('show');
+    }
+
+    // Browse button and drop zone both trigger file picker
+    document.getElementById('browseBtn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      audioInput.click();
+    });
+
+    dropZone.addEventListener('click', (e) => {
+      if (e.target === document.getElementById('browseBtn') || document.getElementById('browseBtn').contains(e.target)) return;
+      audioInput.click();
+    });
+
+    audioInput.addEventListener('change', e => { if (e.target.files[0]) showFile(e.target.files[0]); });
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file) { const dt = new DataTransfer(); dt.items.add(file); audioInput.files = dt.files; showFile(file); }
+    });
+
+    removeBtn.addEventListener('click', resetUpload);
+    analyzeAgain.addEventListener('click', resetUpload);
+
+    /* ── Submit ── */
+    emotionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultWrap.classList.remove('show');
+      errorMsg.classList.remove('show');
+      submitBtn.classList.add('loading');
+      submitBtn.disabled = true;
+
+      const formData = new FormData(emotionForm);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 60000);
+
+      try {
+        const res  = await fetch('/predict', { method:'POST', body: formData, signal: controller.signal });
+        clearTimeout(timeout);
+        const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || `Server error (${res.status})`);
+
+        const key        = (data.emotion || 'neutral').toLowerCase();
+        const confidence = data.confidence || 0;
+        const info       = emotions[key] || emotions['neutral'];
+        const lvl        = getLevel(confidence);
+
+        /* Illustration */
+        // Tint entire result banner to emotion color
+        const banner = document.getElementById('resultBanner');
+        banner.style.background = info.bg;
+        banner.style.transition = 'background 0.4s ease';
+
+        const illus = document.getElementById('emotionIllustration');
+        illus.style.background = info.color + '22';
+        illus.style.boxShadow  = `0 0 0 8px ${info.color}15, 0 0 0 12px ${info.color}0a`;
+        illus.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="${info.color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${info.svgPath}</svg>`;
+
+        /* Name & note */
+        document.getElementById('emotionName').textContent = info.label;
+        document.getElementById('emotionName').style.color = info.color;
+        document.getElementById('emotionNote').textContent = info.note;
+        document.getElementById('emotionNote').style.color = info.color + 'aa';
+
+        /* Confidence number */
+        document.getElementById('confNumber').textContent = confidence + '%';
+        document.getElementById('confNumber').style.color = info.color;
+        document.getElementById('confLevelLabel').textContent = lvl.text;
+        document.getElementById('confLevelLabel').style.color = info.color;
+
+        /* Bar */
+        const fill = document.getElementById('trackFill');
+        fill.style.background = `linear-gradient(90deg, ${info.color}88, ${info.color})`;
+        setTimeout(() => { fill.style.width = confidence + '%'; }, 80);
+
+        /* Dots */
+        // Only highlight the single dot that matches the current confidence level
+        for (let i = 1; i <= 5; i++) {
+          const dot = document.getElementById('dot' + i);
+          if (i === lvl.pips) {
+            dot.classList.add('lit');
+            dot.style.background = info.color;
+            dot.style.border = 'none';
+            dot.style.transform = 'scale(1.4)';
+            dot.style.boxShadow = `0 0 0 3px ${info.color}33`;
+          } else {
+            dot.classList.remove('lit');
+            dot.style.background = '';
+            dot.style.border = '';
+            dot.style.transform = '';
+            dot.style.boxShadow = '';
+          }
+        }
+
+        resultWrap.classList.add('show');
+
+      } catch (err) {
+        clearTimeout(timeout);
+        const msg = err.name === 'AbortError'
+          ? 'Request timed out. The server may be busy — please try again.'
+          : (err.message || 'Something went wrong. Please try again.');
+        errorMsg.textContent = '⚠ ' + msg;
+        errorMsg.classList.add('show');
+      } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
