@@ -82,7 +82,8 @@ dataset/
     ├── ...
     └── Actor_24/
 ```
-
+> ⚠️ **Model files not included:** Download pre-trained model files and place them
+> in the `models/` folder, or run `python train_model.py` after downloading the dataset.
 ---
 
 ## 🚀 Setup & Installation
@@ -108,7 +109,10 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
-
+> ⚠️ Also install ffmpeg on your system:
+> - Windows: https://ffmpeg.org/download.html
+> - Mac: `brew install ffmpeg`
+> - Linux: `sudo apt install ffmpeg`
 ---
 
 ## 🏋️ Train the Model (Optional)
